@@ -2,155 +2,191 @@
 <html lang="es">
 <head>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: transparent; overflow: hidden; display: flex; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background: transparent; overflow: hidden; display: flex; }
         
-        /* --- VISUAL DE TRANSMISIÓN (Lo que ve la gente) --- */
-        .display-area { width: 800px; padding: 40px; display: flex; align-items: center; justify-content: flex-start; height: 100vh;}
+        /* --- VISUAL DE TRANSMISIÓN --- */
+        .display-area { width: 900px; padding: 50px; display: flex; align-items: center; justify-content: flex-start; height: 100vh;}
         
         .stat-bar { 
             display: flex; align-items: center; 
-            opacity: 0; transform: scale(0.5) translateX(-200px); 
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            opacity: 0; transform: scale(0.8) translateX(-300px); 
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             position: absolute;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            border-radius: 8px;
-            overflow: hidden;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
         }
         
         .stat-bar.active { opacity: 1; transform: scale(1) translateX(0); }
 
-        /* Efecto Brillo */
-        .stat-bar::after {
-            content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transform: skewX(-20deg);
+        .dorsal {
+            width: 45px; height: 45px;
+            background: #FFD700; color: #000;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 22px;
+            margin-right: -25px; z-index: 3;
+            border: 3px solid #fff;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+            display: none;
         }
-        .stat-bar.active::after { animation: brillo 1.5s 0.5s infinite; }
-        @keyframes brillo { 0% { left: -150%; } 100% { left: 150%; } }
 
-        .label { color: white; padding: 15px 25px; font-weight: bold; border-left: 6px solid #FFD700; min-width: 140px; text-align: center; text-transform: uppercase; font-size: 14px; }
+        .label { 
+            color: white; padding: 15px 30px 15px 45px; 
+            font-weight: 800; border-radius: 8px 0 0 8px;
+            min-width: 140px; text-align: center; text-transform: uppercase; 
+            font-size: 14px; z-index: 2; position: relative;
+        }
         
-        .bg-gol { background: linear-gradient(135deg, #001f3f, #003366); } 
-        .bg-amarilla { background: linear-gradient(135deg, #ffcc00, #e6b800); color: black; border-left-color: #000; }
-        .bg-roja { background: linear-gradient(135deg, #ee0000, #cc0000); }
-        .bg-falta { background: linear-gradient(135deg, #444, #222); }
-        .bg-agua { background: linear-gradient(135deg, #00aaff, #0080ff); }
+        /* Colores de Eventos */
+        .bg-gol { background: linear-gradient(90deg, #001f3f, #003366); } 
+        .bg-amarilla { background: linear-gradient(90deg, #ffcc00, #e6b800); color: black; }
+        .bg-roja { background: linear-gradient(90deg, #ee0000, #cc0000); }
+        .bg-falta { background: linear-gradient(90deg, #444, #222); }
+        .bg-penal { background: linear-gradient(90deg, #ff4500, #ff0000); border-left: 6px solid #fff; }
+        .bg-fuerade { background: linear-gradient(90deg, #556b2f, #228b22); }
+        .bg-agua { background: linear-gradient(90deg, #00aaff, #0080ff); }
 
         .content { 
-            background: rgba(255, 255, 255, 0.98); color: #1a1a1a; padding: 15px 30px; 
-            min-width: 400px; font-weight: 800; font-size: 20px; 
+            background: #fff; color: #1a1a1a; padding: 15px 30px; 
+            min-width: 350px; font-weight: 700; font-size: 22px; 
+            border-radius: 0 8px 8px 0; border-left: 1px solid #ddd;
+            display: flex; flex-direction: column;
         }
+        .team-tag { font-size: 12px; color: #666; text-transform: uppercase; margin-top: -2px; }
 
-        /* --- TU PANEL DE CONTROL DETALLADO --- */
+        /* --- PANEL DE CONTROL --- */
         .admin-panel {
-            background: #111; color: #eee; padding: 20px; width: 380px;
-            height: 100vh; border-left: 5px solid #FFD700; box-sizing: border-box;
-            display: flex; flex-direction: column; gap: 10px; overflow-y: auto;
+            background: #0f0f0f; color: #fff; padding: 20px; width: 380px;
+            height: 100vh; border-left: 4px solid #FFD700; box-sizing: border-box;
+            display: flex; flex-direction: column; gap: 10px;
         }
-        h3 { color: #FFD700; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 0; font-size: 16px; text-align: center; }
+        h3 { color: #FFD700; margin: 0; font-size: 16px; text-align: center; border-bottom: 1px solid #333; padding-bottom: 8px;}
         
-        .form-container { background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; }
-        .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .form-group { flex: 1; }
+        label { display: block; font-size: 10px; color: #888; margin-bottom: 3px; font-weight: bold; text-transform: uppercase; }
+        input { width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; box-sizing: border-box; margin-bottom: 5px; }
         
-        label { display: block; font-size: 10px; color: #aaa; margin-bottom: 4px; font-weight: bold; }
-        input { width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; font-size: 13px; }
-        
-        .grid-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        button { border: none; padding: 12px; cursor: pointer; font-weight: bold; border-radius: 5px; text-transform: uppercase; font-size: 11px; }
-        
-        .btn-gol { background: #003366; color: white; }
-        .btn-amarilla { background: #e6b800; color: black; }
-        .btn-roja { background: #cc0000; color: white; }
-        .btn-falta { background: #444; color: white; }
-        .btn-agua { background: #0080ff; color: white; width: 100%; margin-top: 10px; }
+        .type-select { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 10px; }
+        .type-btn { background: #333; color: #fff; padding: 10px; font-size: 10px; opacity: 0.6; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; text-transform: uppercase;}
+        .type-btn.selected { opacity: 1; border: 2px solid #FFD700; background: #444; }
+
+        .btn-lanzar { background: #FFD700; color: #000; width: 100%; padding: 15px; font-weight: 900; border-radius: 6px; cursor: pointer; border: none; text-transform: uppercase; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <div class="display-area">
         <div class="stat-bar" id="notif-bar">
-            <div class="label" id="notif-label">EVENTO</div>
-            <div class="content" id="notif-txt">Mensaje</div>
+            <div id="num-circle" class="dorsal">10</div>
+            <div class="label" id="notif-label">GOL</div>
+            <div class="content">
+                <span id="player-display">Nombre Jugador</span>
+                <span id="team-display" class="team-tag">Equipo</span>
+            </div>
         </div>
     </div>
 
     <div class="admin-panel">
-        <h3>SISTEMA DE EVENTOS</h3>
+        <h3>CONTROLES ABRAZO DE GOL</h3>
         
-        <div class="form-container">
-            <div class="form-group" style="margin-bottom: 10px;">
-                <label>NOMBRE DEL JUGADOR:</label>
-                <input type="text" id="in-name" placeholder="Ej: Jony Cortes">
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>NÚMERO (#):</label>
-                    <input type="text" id="in-num" placeholder="10">
-                </div>
-                <div class="form-group">
-                    <label>EQUIPO:</label>
-                    <input type="text" id="in-team" placeholder="UDG">
-                </div>
-            </div>
-
-            <div class="grid-btns">
-                <button class="btn-gol" onclick="lanzar('GOLLL!!!', 'bg-gol')">GOLLL!!!</button>
-                <button class="btn-falta" onclick="lanzar('⚠️ FALTA', 'bg-falta')">FALTA</button>
-                <button class="btn-amarilla" onclick="lanzar('🟨 AMARILLA', 'bg-amarilla')">T. AMARILLA</button>
-                <button class="btn-roja" onclick="lanzar('🟥 ROJA', 'bg-roja')">T. ROJA</button>
-            </div>
-            <button class="btn-agua" onclick="lanzarHidratacion()">💧 HIDRATACIÓN</button>
+        <label>1. Selecciona Evento:</label>
+        <div class="type-select">
+            <button class="type-btn selected" id="t-gol" onclick="selType(' GOL', 'bg-gol', 't-gol')">Gol</button>
+            <button class="type-btn" id="t-pen" onclick="selType('🥅 PENAL', 'bg-penal', 't-pen')">Penal</button>
+            <button class="type-btn" id="t-fal" onclick="selType('⚠️ FALTA', 'bg-falta', 't-fal')">Falta</button>
+            <button class="type-btn" id="t-fue" onclick="selType('🚩 FUERA DE L.', 'bg-fuerade', 't-fue')">Fuera de L.</button>
+            <button class="type-btn" id="t-ama" onclick="selType('🟨 AMARILLA', 'bg-amarilla', 't-ama')">T. Amarilla</button>
+            <button class="type-btn" id="t-roj" onclick="selType('🟥 ROJA', 'bg-roja', 't-roj')">T. Roja</button>
         </div>
 
-        <button style="background: #333; color: #888; margin-top: auto;" onclick="ocultar()">OCULTAR AHORA</button>
+        <label>2. Datos del Protagonista (Opcional):</label>
+        <input type="text" id="in-name" placeholder="Nombre (o vacío para general)">
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="in-num" placeholder="Dorsal" style="width: 30%;">
+            <input type="text" id="in-team" placeholder="Equipo" style="width: 70%;">
+        </div>
+
+        <button class="btn-lanzar" onclick="lanzar()">MOSTRAR ALERTA 🚀</button>
+        <button style="background: #0080ff; color: #fff; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;" onclick="lanzarAgua()">💧 HIDRATACIÓN</button>
+        
+        <button style="background: #222; color: #666; padding: 8px; border: none; margin-top: auto; cursor: pointer; border-radius: 5px;" onclick="ocultar()">OCULTAR</button>
     </div>
 
     <script>
-        const bar = document.getElementById('notif-bar');
-        const label = document.getElementById('notif-label');
-        const text = document.getElementById('notif-txt');
-        
+        let currentType = ' GOL';
+        let currentColor = 'bg-gol';
         let timer;
+        let sequenceTimer; // Nuevo timer para la secuencia
 
-        function lanzar(tipo, color) {
+        const frasesAuto = {
+            ' GOL': '¡GOOOOOOOOOOL!',
+            '🥅 PENAL': '¡SENTENCIA MÁXIMA!',
+            '⚠️ FALTA': '¡HAY INFRACCIÓN!',
+            '🚩 FUERA DE L.': '¡POSICIÓN ADELANTADA!',
+            '🟨 AMARILLA': '¡TARJETA AMARILLA!',
+            '🟥 ROJA': '¡A LAS REGADERAS!'
+        };
+
+        function selType(t, c, id) {
+            currentType = t;
+            currentColor = c;
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById(id).classList.add('selected');
+        }
+
+        function lanzar() {
+            clearTimeout(sequenceTimer); // Limpiar secuencias previas
             const nom = document.getElementById('in-name').value;
             const num = document.getElementById('in-num').value;
             const team = document.getElementById('in-team').value;
 
-            if(!nom) return alert("Mínimo pon el nombre, Jony.");
+            const playerDisp = document.getElementById('player-display');
+            const teamDisp = document.getElementById('team-display');
+            const circle = document.getElementById('num-circle');
+            const label = document.getElementById('notif-label');
 
-            // Construir mensaje: [10] Jony Cortes - UDG
-            let mensaje = "";
-            if(num) mensaje += `[${num}] `;
-            mensaje += nom;
-            if(team) mensaje += ` - ${team}`;
+            // 1. Mostrar SIEMPRE la alerta predeterminada primero
+            playerDisp.innerText = frasesAuto[currentType];
+            teamDisp.innerText = "ABRAZO DE GOL";
+            circle.style.display = 'none';
+            
+            label.innerText = currentType;
+            label.className = "label " + currentColor;
 
-            label.className = "label " + color;
-            label.innerText = tipo;
-            text.innerText = mensaje;
+            // 2. Si hay un nombre, programar el cambio a los 2 segundos
+            if(nom) {
+                sequenceTimer = setTimeout(() => {
+                    playerDisp.innerText = nom;
+                    teamDisp.innerText = team || "ABRAZO DE GOL";
+                    if(num) {
+                        circle.innerText = num;
+                        circle.style.display = 'flex';
+                    }
+                }, 5000);
+            }
 
             showBar();
         }
 
-        function lanzarHidratacion() {
-            label.className = "label bg-agua";
-            label.innerText = "TIEMPO";
-            text.innerText = "💧 RECESO DE HIDRATACIÓN";
+        function lanzarAgua() {
+            clearTimeout(sequenceTimer);
+            document.getElementById('num-circle').style.display = 'none';
+            document.getElementById('notif-label').innerText = "TIEMPO";
+            document.getElementById('notif-label').className = "label bg-agua";
+            document.getElementById('player-display').innerText = "PAUSA DE HIDRATACIÓN";
+            document.getElementById('team-display').innerText = "¡Refresquen las ideas!";
             showBar();
         }
 
         function showBar() {
             clearTimeout(timer);
+            const bar = document.getElementById('notif-bar');
             bar.classList.remove('active');
-            void bar.offsetWidth; // Reset animación
+            void bar.offsetWidth;
             bar.classList.add('active');
-            timer = setTimeout(ocultar, 8000);
+            timer = setTimeout(ocultar, 20000); 
         }
 
         function ocultar() {
-            bar.classList.remove('active');
+            document.getElementById('notif-bar').classList.remove('active');
         }
     </script>
 </body>
