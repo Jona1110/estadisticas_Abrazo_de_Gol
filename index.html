@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: transparent; overflow: hidden; display: flex; }
+        
+        /* --- VISUAL DE TRANSMISIÓN --- */
+        .display-area { width: 600px; padding: 40px; display: flex; align-items: center; justify-content: flex-start; }
+        .stat-bar { 
+            display: flex; align-items: center; 
+            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
+            opacity: 0; transform: translateY(20px); position: absolute;
+        }
+        .stat-bar.active { opacity: 1; transform: translateY(0); }
+        
+        .label { background: #003366; color: white; padding: 12px 20px; font-weight: bold; border-left: 5px solid #FFD700; min-width: 140px; text-align: center; text-transform: uppercase; }
+        .content { background: rgba(255, 255, 255, 0.95); color: #1a1a1a; padding: 12px 25px; min-width: 300px; font-weight: 600; box-shadow: 5px 5px 15px rgba(0,0,0,0.2); }
+
+        /* --- PANEL DE CONTROL FIJO --- */
+        .admin-panel {
+            background: #111; color: #eee; padding: 20px; width: 350px;
+            height: 100vh; border-left: 4px solid #003366; box-sizing: border-box;
+        }
+        h3 { color: #FFD700; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 0; }
+        .input-group { background: #222; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
+        label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px; background: #333; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
+        button { background: #003366; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; border-radius: 4px; }
+        button:hover { background: #004a94; }
+        .status { font-size: 10px; color: #555; text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="display-area">
+        <div class="stat-bar active" id="bar-0">
+            <div class="label">GOLEADOR</div>
+            <div class="content" id="txt-0">Esperando Goleador...</div>
+        </div>
+        
+        <div class="stat-bar" id="bar-1">
+            <div class="label">PRÓXIMO PARTIDO</div>
+            <div class="content" id="txt-1">Próximo Partido...</div>
+        </div>
+    </div>
+
+    <div class="admin-panel">
+        <h3>CONTROLES ABRAZO DE GOL</h3>
+        
+        <div class="input-group">
+            <label>DATOS DEL GOLEADOR:</label>
+            <input type="text" id="in-0" placeholder="Nombre - Goles">
+            <button onclick="updateData(0)">ACTUALIZAR GOLEADOR</button>
+        </div>
+
+        <div class="input-group">
+            <label>DATOS PRÓXIMO PARTIDO:</label>
+            <input type="text" id="in-1" placeholder="Equipo A vs Equipo B">
+            <button onclick="updateData(1)">ACTUALIZAR PRÓXIMO</button>
+        </div>
+
+        <div class="status">
+            CAMBIO AUTOMÁTICO CADA 2 SEG<br>
+        </div>
+    </div>
+
+    <script>
+        let currentIndex = 0;
+        const totalBars = 2;
+
+        // Función para cambiar de barra automáticamente
+        function switchBar() {
+            // Quitamos la clase active a la actual
+            document.getElementById('bar-' + currentIndex).classList.remove('active');
+            
+            // Pasamos a la siguiente
+            currentIndex = (currentIndex + 1) % totalBars;
+            
+            // Agregamos la clase active a la nueva
+            document.getElementById('bar-' + currentIndex).classList.add('active');
+        }
+
+        // Función para actualizar los datos desde el panel
+        function updateData(id) {
+            const val = document.getElementById('in-' + id).value;
+            if(val) {
+                document.getElementById('txt-' + id).innerText = val;
+                document.getElementById('in-' + id).value = ""; // Limpia el cuadro
+            }
+        }
+
+        // Inicia el carrusel cada 5 segundos
+        setInterval(switchBar, 2000);
+    </script>
+</body>
+</html>
