@@ -5,107 +5,153 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: transparent; overflow: hidden; display: flex; }
         
         /* --- VISUAL DE TRANSMISIÓN (Lo que ve la gente) --- */
-        .display-area { width: 600px; padding: 40px; display: flex; align-items: center; justify-content: flex-start; height: 100vh;}
+        .display-area { width: 800px; padding: 40px; display: flex; align-items: center; justify-content: flex-start; height: 100vh;}
+        
         .stat-bar { 
             display: flex; align-items: center; 
-            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
-            opacity: 0; transform: translateY(20px); position: absolute;
+            opacity: 0; transform: scale(0.5) translateX(-200px); 
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            position: absolute;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            border-radius: 8px;
+            overflow: hidden;
         }
-        .stat-bar.active { opacity: 1; transform: translateY(0); }
         
-        .label { background: #003366; color: white; padding: 12px 20px; font-weight: bold; border-left: 5px solid #FFD700; min-width: 140px; text-align: center; text-transform: uppercase; }
-        .content { background: rgba(255, 255, 255, 0.95); color: #1a1a1a; padding: 12px 25px; min-width: 300px; font-weight: 600; box-shadow: 5px 5px 15px rgba(0,0,0,0.2); }
+        .stat-bar.active { opacity: 1; transform: scale(1) translateX(0); }
 
-        /* --- TU PANEL DE CONTROL (Lo que ves tú en Interactuar) --- */
-        .admin-panel {
-            background: #111; color: #eee; padding: 20px; width: 350px;
-            height: 100vh; border-left: 4px solid #003366; box-sizing: border-box;
-            display: flex; flex-direction: column; gap: 10px;
+        /* Efecto Brillo */
+        .stat-bar::after {
+            content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: skewX(-20deg);
         }
-        h3 { color: #FFD700; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 0; font-size: 16px;}
-        .input-group { background: #222; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
-        label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; text-transform: uppercase;}
-        input { width: 100%; padding: 10px; background: #333; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
-        button { background: #003366; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; border-radius: 4px; transition: 0.3s;}
-        button:hover { background: #004a94; }
-        .status { font-size: 10px; color: #555; text-align: center; margin-top: auto; border-top: 1px solid #333; padding-top: 10px;}
+        .stat-bar.active::after { animation: brillo 1.5s 0.5s infinite; }
+        @keyframes brillo { 0% { left: -150%; } 100% { left: 150%; } }
+
+        .label { color: white; padding: 15px 25px; font-weight: bold; border-left: 6px solid #FFD700; min-width: 140px; text-align: center; text-transform: uppercase; font-size: 14px; }
+        
+        .bg-gol { background: linear-gradient(135deg, #001f3f, #003366); } 
+        .bg-amarilla { background: linear-gradient(135deg, #ffcc00, #e6b800); color: black; border-left-color: #000; }
+        .bg-roja { background: linear-gradient(135deg, #ee0000, #cc0000); }
+        .bg-falta { background: linear-gradient(135deg, #444, #222); }
+        .bg-agua { background: linear-gradient(135deg, #00aaff, #0080ff); }
+
+        .content { 
+            background: rgba(255, 255, 255, 0.98); color: #1a1a1a; padding: 15px 30px; 
+            min-width: 400px; font-weight: 800; font-size: 20px; 
+        }
+
+        /* --- TU PANEL DE CONTROL DETALLADO --- */
+        .admin-panel {
+            background: #111; color: #eee; padding: 20px; width: 380px;
+            height: 100vh; border-left: 5px solid #FFD700; box-sizing: border-box;
+            display: flex; flex-direction: column; gap: 10px; overflow-y: auto;
+        }
+        h3 { color: #FFD700; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 0; font-size: 16px; text-align: center; }
+        
+        .form-container { background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .form-group { flex: 1; }
+        
+        label { display: block; font-size: 10px; color: #aaa; margin-bottom: 4px; font-weight: bold; }
+        input { width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; font-size: 13px; }
+        
+        .grid-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        button { border: none; padding: 12px; cursor: pointer; font-weight: bold; border-radius: 5px; text-transform: uppercase; font-size: 11px; }
+        
+        .btn-gol { background: #003366; color: white; }
+        .btn-amarilla { background: #e6b800; color: black; }
+        .btn-roja { background: #cc0000; color: white; }
+        .btn-falta { background: #444; color: white; }
+        .btn-agua { background: #0080ff; color: white; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="display-area">
-        <div class="stat-bar active" id="bar-0">
-            <div class="label">GOLEADOR</div>
-            <div class="content" id="txt-0">Jony - 10 Goles</div>
-        </div>
-        
-        <div class="stat-bar" id="bar-1">
-            <div class="label">PRÓXIMO PARTIDO</div>
-            <div class="content" id="txt-1">UDG vs CUTonalá</div>
-        </div>
-
-        <div class="stat-bar" id="bar-2">
-            <div class="label">AVISO</div>
-            <div class="content" id="txt-2">¡Suscríbete a nuestras redes sociales!</div>
+        <div class="stat-bar" id="notif-bar">
+            <div class="label" id="notif-label">EVENTO</div>
+            <div class="content" id="notif-txt">Mensaje</div>
         </div>
     </div>
 
     <div class="admin-panel">
-        <h3>CONTROLES ABRAZO DE GOL</h3>
+        <h3>SISTEMA DE EVENTOS</h3>
         
-        <div class="input-group">
-            <label>DATOS DEL GOLEADOR:</label>
-            <input type="text" id="in-0" placeholder="Ej: Nombre - Goles">
-            <button onclick="updateData(0)">ACTUALIZAR GOLEADOR</button>
+        <div class="form-container">
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>NOMBRE DEL JUGADOR:</label>
+                <input type="text" id="in-name" placeholder="Ej: Jony Cortes">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>NÚMERO (#):</label>
+                    <input type="text" id="in-num" placeholder="10">
+                </div>
+                <div class="form-group">
+                    <label>EQUIPO:</label>
+                    <input type="text" id="in-team" placeholder="UDG">
+                </div>
+            </div>
+
+            <div class="grid-btns">
+                <button class="btn-gol" onclick="lanzar('⚽ GOL', 'bg-gol')">Gol</button>
+                <button class="btn-falta" onclick="lanzar('⚠️ FALTA', 'bg-falta')">Falta</button>
+                <button class="btn-amarilla" onclick="lanzar('🟨 AMARILLA', 'bg-amarilla')">T. Amarilla</button>
+                <button class="btn-roja" onclick="lanzar('🟥 ROJA', 'bg-roja')">T. Roja</button>
+            </div>
+            <button class="btn-agua" onclick="lanzarHidratacion()">💧 HIDRATACIÓN</button>
         </div>
 
-        <div class="input-group">
-            <label>DATOS PRÓXIMO PARTIDO:</label>
-            <input type="text" id="in-1" placeholder="Ej: Equipo A vs Equipo B">
-            <button onclick="updateData(1)">ACTUALIZAR PRÓXIMO</button>
-        </div>
-
-        <div class="input-group">
-            <label>TEXTO DEL AVISO:</label>
-            <input type="text" id="in-2" placeholder="Ej: ¡Nuevo video!">
-            <button onclick="updateData(2)">ACTUALIZAR AVISO</button>
-        </div>
-
-        <div class="status">
-            CAMBIO AUTOMÁTICO CADA 5 SEG<br>
-            (Recorta esta zona negra en OBS con ALT)
-        </div>
+        <button style="background: #333; color: #888; margin-top: auto;" onclick="ocultar()">OCULTAR AHORA</button>
     </div>
 
     <script>
-        let currentIndex = 0;
-        const totalBars = 3; // Ahora son 3 barras
+        const bar = document.getElementById('notif-bar');
+        const label = document.getElementById('notif-label');
+        const text = document.getElementById('notif-txt');
+        
+        let timer;
 
-        // Función para cambiar de barra automáticamente
-        function switchBar() {
-            // Quitamos la clase active a la actual
-            document.getElementById('bar-' + currentIndex).classList.remove('active');
-            
-            // Pasamos a la siguiente
-            currentIndex = (currentIndex + 1) % totalBars;
-            
-            // Agregamos la clase active a la nueva
-            document.getElementById('bar-' + currentIndex).classList.add('active');
+        function lanzar(tipo, color) {
+            const nom = document.getElementById('in-name').value;
+            const num = document.getElementById('in-num').value;
+            const team = document.getElementById('in-team').value;
+
+            if(!nom) return alert("Mínimo pon el nombre, Jony.");
+
+            // Construir mensaje: [10] Jony Cortes - UDG
+            let mensaje = "";
+            if(num) mensaje += `[${num}] `;
+            mensaje += nom;
+            if(team) mensaje += ` - ${team}`;
+
+            label.className = "label " + color;
+            label.innerText = tipo;
+            text.innerText = mensaje;
+
+            showBar();
         }
 
-        // Función para actualizar los datos desde el panel
-        function updateData(id) {
-            const val = document.getElementById('in-' + id).value;
-            if(val) {
-                // Actualiza el texto en la barra correspondiente
-                document.getElementById('txt-' + id).innerText = val;
-                // Limpia el cuadro de texto del panel
-                document.getElementById('in-' + id).value = ""; 
-            }
+        function lanzarHidratacion() {
+            label.className = "label bg-agua";
+            label.innerText = "TIEMPO";
+            text.innerText = "💧 RECESO DE HIDRATACIÓN";
+            showBar();
         }
 
-        // Inicia el carrusel de cambio cada 5 segundos
-        setInterval(switchBar, 3000);
+        function showBar() {
+            clearTimeout(timer);
+            bar.classList.remove('active');
+            void bar.offsetWidth; // Reset animación
+            bar.classList.add('active');
+            timer = setTimeout(ocultar, 8000);
+        }
+
+        function ocultar() {
+            bar.classList.remove('active');
+        }
     </script>
 </body>
 </html>
