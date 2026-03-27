@@ -1,193 +1,252 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta charset="UTF-8">
     <style>
-        body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background: transparent; overflow: hidden; display: flex; }
+        :root { --gold: #FFD700; --dark: #0f0f0f; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background: transparent; overflow: hidden; display: flex; height: 100vh; width: 100vw; }
         
-        /* --- VISUAL DE TRANSMISIÓN --- */
-        .display-area { width: 900px; padding: 50px; display: flex; align-items: center; justify-content: flex-start; height: 100vh;}
+        /* --- ÁREA DE TRANSMISIÓN --- */
+        .display-area { flex-grow: 1; position: relative; display: flex; align-items: flex-end; padding: 0 0 60px 60px; }
         
         .stat-bar { 
-            display: flex; align-items: center; 
-            opacity: 0; transform: scale(0.8) translateX(-300px); 
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            position: absolute;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+            display: flex; align-items: stretch; opacity: 0; 
+            transform: translateX(-50px) skewX(-12deg); 
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); 
+            filter: drop-shadow(5px 15px 25px rgba(0,0,0,0.5));
+            height: 85px;
         }
         
-        .stat-bar.active { opacity: 1; transform: scale(1) translateX(0); }
+        .stat-bar.active { opacity: 1; transform: translateX(0) skewX(-12deg); }
 
-        .dorsal {
-            width: 45px; height: 45px;
-            background: #FFD700; color: #000;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 22px;
-            margin-right: -25px; z-index: 3;
-            border: 3px solid #fff;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
-            display: none;
+        /* BLOQUE EVENTO (GOL, PENAL...) */
+        .event-label { 
+            color: white; padding: 0 40px; 
+            font-weight: 900; text-transform: uppercase; 
+            font-size: 28px; display: flex; align-items: center; justify-content: center;
+            min-width: 180px; z-index: 5;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .label { 
-            color: white; padding: 15px 30px 15px 45px; 
-            font-weight: 800; border-radius: 8px 0 0 8px;
-            min-width: 140px; text-align: center; text-transform: uppercase; 
-            font-size: 14px; z-index: 2; position: relative;
-        }
-        
-        /* Colores de Eventos */
-        .bg-gol { background: linear-gradient(90deg, #001f3f, #003366); } 
-        .bg-amarilla { background: linear-gradient(90deg, #ffcc00, #e6b800); color: black; }
-        .bg-roja { background: linear-gradient(90deg, #ee0000, #cc0000); }
-        .bg-falta { background: linear-gradient(90deg, #444, #222); }
-        .bg-penal { background: linear-gradient(90deg, #ff4500, #ff0000); border-left: 6px solid #fff; }
-        .bg-fuerade { background: linear-gradient(90deg, #556b2f, #228b22); }
-        .bg-agua { background: linear-gradient(90deg, #00aaff, #0080ff); }
+        /* Colores dinámicos */
+        .bg-gol { background: linear-gradient(135deg, #001f3f, #004488); border-bottom: 6px solid #00aaff; }
+        .bg-penal { background: linear-gradient(135deg, #ff4500, #ff0000); border-bottom: 6px solid #fff; }
+        .bg-amarilla { background: linear-gradient(135deg, #ffcc00, #ffaa00); color: black !important; border-bottom: 6px solid #333; }
+        .bg-roja { background: linear-gradient(135deg, #ee0000, #880000); border-bottom: 6px solid #000; }
+        .bg-falta { background: linear-gradient(135deg, #333, #111); border-bottom: 6px solid #666; }
+        .bg-fuerade { background: linear-gradient(135deg, #556b2f, #228b22); border-bottom: 6px solid #fff; }
+        .bg-agua { background: linear-gradient(135deg, #00aaff, #0055ff); border-bottom: 6px solid #fff; }
 
-        .content { 
-            background: #fff; color: #1a1a1a; padding: 15px 30px; 
-            min-width: 350px; font-weight: 700; font-size: 22px; 
-            border-radius: 0 8px 8px 0; border-left: 1px solid #ddd;
-            display: flex; flex-direction: column;
+        /* BLOQUE CONTENIDO */
+        .info-content { 
+            background: #fff; color: #1a1a1a; padding: 0 50px; 
+            min-width: 500px; display: flex; align-items: center;
+            border-right: 12px solid var(--gold);
+            transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1), color 0.8s;
+            position: relative; overflow: hidden;
         }
-        .team-tag { font-size: 12px; color: #666; text-transform: uppercase; margin-top: -2px; }
+
+        .no-skew { transform: skewX(12deg); display: flex; align-items: center; gap: 20px; width: 100%; height: 100%; }
+
+        /* Contenedor con animación suave de contenido */
+        .content-fader {
+            display: flex; align-items: center; gap: 15px;
+            transition: all 0.6s ease;
+            width: 100%;
+        }
+
+        .logo-frame {
+            width: 65px; height: 65px; background: #fff; border-radius: 50%;
+            display: none; align-items: center; justify-content: center;
+            border: 2px solid rgba(0,0,0,0.1); overflow: hidden; flex-shrink: 0;
+        }
+        .logo-frame img { width: 85%; height: 85%; object-fit: contain; }
+
+        .player-num {
+            font-weight: 900; font-size: 38px; font-style: italic;
+            color: var(--gold); text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+            display: none; line-height: 1; margin-right: 5px;
+        }
+
+        .text-group { display: flex; flex-direction: column; justify-content: center; }
+        .player-name { font-size: 36px; font-weight: 900; text-transform: uppercase; line-height: 0.9; white-space: nowrap; }
+        .team-name { font-size: 15px; opacity: 0.7; text-transform: uppercase; font-weight: 700; margin-top: 5px; }
+
+        /* Animación suave para el cambio de texto */
+        .fade-out { opacity: 0; transform: translateY(-10px); }
+        .fade-in { opacity: 1; transform: translateY(0); }
 
         /* --- PANEL DE CONTROL --- */
         .admin-panel {
-            background: #0f0f0f; color: #fff; padding: 20px; width: 380px;
-            height: 100vh; border-left: 4px solid #FFD700; box-sizing: border-box;
-            display: flex; flex-direction: column; gap: 10px;
+            background: #0f0f0f; color: #fff; padding: 20px; width: 400px;
+            height: 100vh; border-left: 4px solid var(--gold); box-sizing: border-box;
+            display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; overflow-y: auto;
         }
-        h3 { color: #FFD700; margin: 0; font-size: 16px; text-align: center; border-bottom: 1px solid #333; padding-bottom: 8px;}
-        
-        label { display: block; font-size: 10px; color: #888; margin-bottom: 3px; font-weight: bold; text-transform: uppercase; }
-        input { width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; box-sizing: border-box; margin-bottom: 5px; }
-        
-        .type-select { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 10px; }
-        .type-btn { background: #333; color: #fff; padding: 10px; font-size: 10px; opacity: 0.6; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; text-transform: uppercase;}
-        .type-btn.selected { opacity: 1; border: 2px solid #FFD700; background: #444; }
-
-        .btn-lanzar { background: #FFD700; color: #000; width: 100%; padding: 15px; font-weight: 900; border-radius: 6px; cursor: pointer; border: none; text-transform: uppercase; margin-top: 5px; }
+        .team-box { background: #1a1a1a; padding: 12px; border-radius: 8px; border: 1px solid #333; }
+        h2 { font-size: 16px; color: var(--gold); text-align: center; margin: 0 0 10px 0; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        label { font-size: 10px; color: #888; font-weight: bold; }
+        input[type="text"], input[type="color"] { width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: white; border-radius: 4px; margin: 4px 0; box-sizing: border-box;}
+        .grid-alerts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+        .btn-alert { background: #333; color: #fff; border: none; padding: 10px 5px; font-size: 9px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .btn-alert.active { background: var(--gold); color: #000; }
+        .btn-main { border: none; padding: 15px; font-weight: 900; border-radius: 6px; cursor: pointer; margin-top: 10px; text-transform: uppercase; font-size: 12px; }
     </style>
 </head>
 <body>
 
     <div class="display-area">
         <div class="stat-bar" id="notif-bar">
-            <div id="num-circle" class="dorsal">10</div>
-            <div class="label" id="notif-label">GOL</div>
-            <div class="content">
-                <span id="player-display">Nombre Jugador</span>
-                <span id="team-display" class="team-tag">Equipo</span>
+            <div id="event-label" class="event-label">GOL</div>
+            <div id="info-box" class="info-content">
+                <div class="no-skew">
+                    <div id="logo-container" class="logo-frame"><img id="team-logo" src=""></div>
+                    <div id="content-animator" class="content-fader">
+                        <span id="display-num" class="player-num">10</span>
+                        <div class="text-group">
+                            <span id="display-player" class="player-name">¡GOOOOL!</span>
+                            <span id="display-team" class="team-name">ABRAZO DE GOL</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="admin-panel">
-        <h3>CONTROLES ABRAZO DE GOL</h3>
-        
-        <label>1. Selecciona Evento:</label>
-        <div class="type-select">
-            <button class="type-btn selected" id="t-gol" onclick="selType(' GOL', 'bg-gol', 't-gol')">Gol</button>
-            <button class="type-btn" id="t-pen" onclick="selType('🥅 PENAL', 'bg-penal', 't-pen')">Penal</button>
-            <button class="type-btn" id="t-fal" onclick="selType('⚠️ FALTA', 'bg-falta', 't-fal')">Falta</button>
-            <button class="type-btn" id="t-fue" onclick="selType('🚩 FUERA DE L.', 'bg-fuerade', 't-fue')">Fuera de L.</button>
-            <button class="type-btn" id="t-ama" onclick="selType('🟨 AMARILLA', 'bg-amarilla', 't-ama')">T. Amarilla</button>
-            <button class="type-btn" id="t-roj" onclick="selType('🟥 ROJA', 'bg-roja', 't-roj')">T. Roja</button>
+        <h2>ABRAZO DE GOL - CONTROL</h2>
+        <div class="team-box">
+            <label>LOCAL</label>
+            <input type="text" id="name-l" value="Equipo Local">
+            <input type="color" id="color-l" value="#003366">
+            <input type="file" id="logo-l" style="font-size:10px" onchange="readLogo('l')">
         </div>
-
-        <label>2. Datos del Protagonista (Opcional):</label>
-        <input type="text" id="in-name" placeholder="Nombre (o vacío para general)">
-        <div style="display: flex; gap: 5px;">
-            <input type="text" id="in-num" placeholder="Dorsal" style="width: 30%;">
-            <input type="text" id="in-team" placeholder="Equipo" style="width: 70%;">
+        <div class="team-box">
+            <label>VISITANTE</label>
+            <input type="text" id="name-v" value="Equipo Visita">
+            <input type="color" id="color-v" value="#ee0000">
+            <input type="file" id="logo-v" style="font-size:10px" onchange="readLogo('v')">
         </div>
-
-        <button class="btn-lanzar" onclick="lanzar()">MOSTRAR ALERTA 🚀</button>
-        <button style="background: #0080ff; color: #fff; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;" onclick="lanzarAgua()">💧 HIDRATACIÓN</button>
-        
-        <button style="background: #222; color: #666; padding: 8px; border: none; margin-top: auto; cursor: pointer; border-radius: 5px;" onclick="ocultar()">OCULTAR</button>
+        <label>EVENTO</label>
+        <div class="grid-alerts">
+            <button class="btn-alert active" onclick="setAlert('⚽ GOL', 'bg-gol', this)">GOL</button>
+            <button class="btn-alert" onclick="setAlert('🥅 PENAL', 'bg-penal', this)">PENAL</button>
+            <button class="btn-alert" onclick="setAlert('🟨 AMARILLA', 'bg-amarilla', this)">AMARILLA</button>
+            <button class="btn-alert" onclick="setAlert('🟥 ROJA', 'bg-roja', this)">ROJA</button>
+            <button class="btn-alert" onclick="setAlert('⚠️ FALTA', 'bg-falta', this)">FALTA</button>
+            <button class="btn-alert" onclick="setAlert('🚩 FUERA L.', 'bg-fuerade', this)">FUERA</button>
+        </div>
+        <div style="display:flex; gap:5px; margin-top:5px">
+            <input type="text" id="player-in" placeholder="Jugador">
+            <input type="text" id="num-in" placeholder="N°" style="width:60px">
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+            <button class="btn-main" style="background:#003366; color:#fff" onclick="lanzar('local')">LOCAL</button>
+            <button class="btn-main" style="background:#ee0000; color:#fff" onclick="lanzar('visitante')">VISITA</button>
+        </div>
+        <button class="btn-alert" style="margin-top:10px; background:#00aaff" onclick="lanzarAgua()">💧 HIDRATACIÓN</button>
+        <button class="btn-alert" style="margin-top:auto; background:#222; color:#888" onclick="ocultar()">OCULTAR</button>
     </div>
 
     <script>
-        let currentType = ' GOL';
-        let currentColor = 'bg-gol';
-        let timer;
-        let sequenceTimer; // Nuevo timer para la secuencia
+        let selEvent = '⚽ GOL', selColor = 'bg-gol', timer, sequence, logoL = "", logoV = "";
+        const frases = { '⚽ GOL': '¡GOOOOOOOL!', '🥅 PENAL': '¡PENAL!', '🟨 AMARILLA': '¡AMARILLA!', '🟥 ROJA': '¡EXPULSADO!', '⚠️ FALTA': '¡FALTA!', '🚩 FUERA L.': '¡FUERA DE LUGAR!' };
 
-        const frasesAuto = {
-            ' GOL': '¡GOOOOOOOOOOL!',
-            '🥅 PENAL': '¡SENTENCIA MÁXIMA!',
-            '⚠️ FALTA': '¡HAY INFRACCIÓN!',
-            '🚩 FUERA DE L.': '¡POSICIÓN ADELANTADA!',
-            '🟨 AMARILLA': '¡TARJETA AMARILLA!',
-            '🟥 ROJA': '¡A LAS REGADERAS!'
-        };
-
-        function selType(t, c, id) {
-            currentType = t;
-            currentColor = c;
-            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
-            document.getElementById(id).classList.add('selected');
+        function readLogo(side) {
+            const file = document.getElementById('logo-' + side).files[0];
+            const reader = new FileReader();
+            reader.onloadend = () => { if(side === 'l') logoL = reader.result; else logoV = reader.result; }
+            if(file) reader.readAsDataURL(file);
         }
 
-        function lanzar() {
-            clearTimeout(sequenceTimer); // Limpiar secuencias previas
-            const nom = document.getElementById('in-name').value;
-            const num = document.getElementById('in-num').value;
-            const team = document.getElementById('in-team').value;
+        function setAlert(txt, cls, btn) {
+            selEvent = txt; selColor = cls;
+            document.querySelectorAll('.btn-alert').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
 
-            const playerDisp = document.getElementById('player-display');
-            const teamDisp = document.getElementById('team-display');
-            const circle = document.getElementById('num-circle');
-            const label = document.getElementById('notif-label');
+        function lanzar(bando) {
+            clearTimeout(sequence);
+            const player = document.getElementById('player-in').value;
+            const num = document.getElementById('num-in').value;
+            const team = (bando === 'local') ? document.getElementById('name-l').value : document.getElementById('name-v').value;
+            const color = (bando === 'local') ? document.getElementById('color-l').value : document.getElementById('color-v').value;
+            const logo = (bando === 'local') ? logoL : logoV;
 
-            // 1. Mostrar SIEMPRE la alerta predeterminada primero
-            playerDisp.innerText = frasesAuto[currentType];
-            teamDisp.innerText = "ABRAZO DE GOL";
-            circle.style.display = 'none';
+            const bar = document.getElementById('notif-bar');
+            const label = document.getElementById('event-label');
+            const info = document.getElementById('info-box');
+            const animator = document.getElementById('content-animator');
+
+            // FASE 1: IMPACTO (GOL / EVENTO)
+            bar.classList.remove('active');
+            void bar.offsetWidth;
             
-            label.innerText = currentType;
-            label.className = "label " + currentColor;
+            animator.classList.remove('fade-in');
+            document.getElementById('display-num').style.display = "none";
+            document.getElementById('logo-container').style.display = "none";
+            label.innerText = selEvent;
+            label.className = "event-label " + selColor;
+            info.style.background = "#ffffff";
+            info.style.color = "#1a1a1a";
+            document.getElementById('display-player').innerText = frases[selEvent];
+            document.getElementById('display-team').innerText = "ABRAZO DE GOL";
+            
+            bar.classList.add('active');
+            setTimeout(() => animator.classList.add('fade-in'), 100);
 
-            // 2. Si hay un nombre, programar el cambio a los 2 segundos
-            if(nom) {
-                sequenceTimer = setTimeout(() => {
-                    playerDisp.innerText = nom;
-                    teamDisp.innerText = team || "ABRAZO DE GOL";
-                    if(num) {
-                        circle.innerText = num;
-                        circle.style.display = 'flex';
-                    }
-                }, 5000);
+            // FASE 2: TRANSICIÓN SUAVE AL JUGADOR (A los 1.8 segundos)
+            if(player) {
+                sequence = setTimeout(() => {
+                    animator.classList.add('fade-out'); // Desvanecer suave
+                    
+                    setTimeout(() => {
+                        info.style.background = color;
+                        const r = parseInt(color.substr(1,2),16), g = parseInt(color.substr(3,2),16), b = parseInt(color.substr(5,2),16);
+                        const isLight = ((r*299 + g*587 + b*114) / 1000 > 125);
+                        info.style.color = isLight ? "#000" : "#fff";
+                        document.getElementById('display-num').style.color = isLight ? "rgba(0,0,0,0.3)" : "var(--gold)";
+                        
+                        document.getElementById('display-player').innerText = player;
+                        document.getElementById('display-team').innerText = team;
+                        
+                        if(num) { 
+                            document.getElementById('display-num').innerText = num; 
+                            document.getElementById('display-num').style.display = "block"; 
+                        }
+                        if(logo) { 
+                            document.getElementById('team-logo').src = logo; 
+                            document.getElementById('logo-container').style.display = "flex"; 
+                        }
+                        
+                        animator.classList.remove('fade-out');
+                        animator.classList.add('fade-in');
+                    }, 600);
+                }, 1800);
             }
 
-            showBar();
+            clearTimeout(timer);
+            timer = setTimeout(ocultar, 12000);
         }
 
         function lanzarAgua() {
-            clearTimeout(sequenceTimer);
-            document.getElementById('num-circle').style.display = 'none';
-            document.getElementById('notif-label').innerText = "TIEMPO";
-            document.getElementById('notif-label').className = "label bg-agua";
-            document.getElementById('player-display').innerText = "PAUSA DE HIDRATACIÓN";
-            document.getElementById('team-display').innerText = "¡Refresquen las ideas!";
-            showBar();
-        }
-
-        function showBar() {
-            clearTimeout(timer);
+            clearTimeout(sequence);
             const bar = document.getElementById('notif-bar');
             bar.classList.remove('active');
             void bar.offsetWidth;
+            document.getElementById('display-num').style.display = "none";
+            document.getElementById('logo-container').style.display = "none";
+            document.getElementById('info-box').style.background = "#fff";
+            document.getElementById('info-box').style.color = "#000";
+            document.getElementById('event-label').className = "event-label bg-agua";
+            document.getElementById('event-label').innerText = "TIEMPO";
+            document.getElementById('display-player').innerText = "HIDRATACIÓN";
+            document.getElementById('display-team').innerText = "PAUSA DE REFRESCO";
             bar.classList.add('active');
-            timer = setTimeout(ocultar, 20000); 
+            clearTimeout(timer);
+            timer = setTimeout(ocultar, 8000);
         }
 
-        function ocultar() {
-            document.getElementById('notif-bar').classList.remove('active');
-        }
+        function ocultar() { document.getElementById('notif-bar').classList.remove('active'); }
     </script>
 </body>
 </html>
