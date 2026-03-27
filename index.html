@@ -119,7 +119,7 @@
         </div>
         
         <div class="grid-alerts">
-            <button class="btn-alert active" onclick="setAlert('⚽ GOL', 'bg-gol', this)">GOL</button>
+            <button class="btn-alert active" onclick="setAlert('GOL', 'bg-gol', this)">GOL</button>
             <button class="btn-alert" onclick="setAlert('🥅 PENAL', 'bg-penal', this)">PENAL</button>
             <button class="btn-alert" onclick="setAlert('🟨 AMAR.', 'bg-amarilla', this)">AMAR.</button>
             <button class="btn-alert" onclick="setAlert('🟥 ROJA', 'bg-roja', this)">ROJA</button>
@@ -142,8 +142,8 @@
     </div>
 
     <script>
-        let selEvent = '⚽ GOL', selColor = 'bg-gol', timer, sequence, logoL = "", logoV = "";
-        const frases = { '⚽ GOL': '¡GOOOOOOOL!', '🥅 PENAL': '¡PENAL!', '🟨 AMAR.': '¡AMARILLA!', '🟥 ROJA': '¡EXPULSADO!', '⚠️ FALTA': '¡FALTA!', '🚩 FUERA': '¡FUERA DE LUGAR!' };
+        let selEvent = 'GOL', selColor = 'bg-gol', timer, sequence, logoL = "", logoV = "";
+        const frases = { 'GOL': '¡GOOOOOOOL!', '🥅 PENAL': '¡PENAL!', '🟨 AMAR.': '¡AMARILLA!', '🟥 ROJA': '¡EXPULSADO!', '⚠️ FALTA': '¡FALTA!', '🚩 FUERA': '¡FUERA DE LUGAR!' };
 
         function readLogo(side) {
             const file = document.getElementById('logo-' + side).files[0];
